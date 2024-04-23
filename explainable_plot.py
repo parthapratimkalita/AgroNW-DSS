@@ -211,6 +211,6 @@ def plot_sunburst(row):
             parents='Supports ',
             
         )
-        # Save the figure as an HTML file
+        # Save the figure as an HTML file.
         py.plot(fig, filename='sunburst_plot.html', auto_open=False)
        
