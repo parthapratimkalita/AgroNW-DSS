@@ -7,7 +7,7 @@ import folium
 import json
 import io
 import re
-import haxx
+import explainable_plot
 import create_field
 import threading
 from folium.plugins import Draw
@@ -62,7 +62,7 @@ class MainWindow(QMainWindow):
     
     def __init__(self, parent=None):
         QMainWindow.__init__(self)
-        uic.loadUi('interface.ui', self)
+        uic.loadUi('QT_ui_interface/interface.ui', self)
 
         self.mainPages.setCurrentWidget(self.homePage)
 
@@ -328,7 +328,7 @@ class MainWindow(QMainWindow):
 
         if response.status_code == 200:
             explanation = response.json()
-            haxx.plot_sunburst(row)
+            explainable_plot.plot_sunburst(row)
             self.show_html_plot("sunburst_plot.html")
         
 
