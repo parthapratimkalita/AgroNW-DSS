@@ -26,5 +26,6 @@ Given the nature of this prototype, some knowlege of the Linux terminal and pack
 - Obtain and set up (compile, install) the Python bindings for SEMPR (also in the [SEMPR Toolkit](https://github.com/sempr-tk))
 - Install all the depedencies listed in the file "requirements.txt".
     - e.g., `pip install -r requirements.txt`
+- Install the wetterdienst API: `pip install wetterdienst`
 - To run the server: `python3 server.py`
 - To run the client: `python3 client.py`
