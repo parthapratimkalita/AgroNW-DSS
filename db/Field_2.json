@@ -1,0 +1,232 @@
+{
+    "value0": {
+        "polymorphic_id": 1073741824,
+        "ptr_wrapper": {
+            "id": 2147483649,
+            "data": {
+                "id": "Field_2",
+                "idIsURI": false,
+                "components": [
+                    {
+                        "key": {
+                            "polymorphic_id": 2147483649,
+                            "polymorphic_name": "sempr::TriplePropertyMap",
+                            "ptr_wrapper": {
+                                "id": 2147483650,
+                                "data": {
+                                    "base": {},
+                                    "map": [
+                                        {
+                                            "key": "agnw:Areacode",
+                                            "value": {
+                                                "type": 0,
+                                                "strValue": "49191",
+                                                "fltValue": 0.0,
+                                                "intValue": 0
+                                            }
+                                        },
+                                        {
+                                            "key": "agnw:CloverRate",
+                                            "value": {
+                                                "type": 2,
+                                                "strValue": "",
+                                                "fltValue": 0.0,
+                                                "intValue": 52
+                                            }
+                                        },
+                                        {
+                                            "key": "agnw:CurrentCrop",
+                                            "value": {
+                                                "type": 3,
+                                                "strValue": "agnw:Grass",
+                                                "fltValue": 0.0,
+                                                "intValue": 0
+                                            }
+                                        },
+                                        {
+                                            "key": "agnw:EarVisible",
+                                            "value": {
+                                                "type": 0,
+                                                "strValue": "false",
+                                                "fltValue": 0.0,
+                                                "intValue": 0
+                                            }
+                                        },
+                                        {
+                                            "key": "agnw:FrozenGround",
+                                            "value": {
+                                                "type": 0,
+                                                "strValue": "false",
+                                                "fltValue": 0.0,
+                                                "intValue": 0
+                                            }
+                                        },
+                                        {
+                                            "key": "agnw:GrassFlowering",
+                                            "value": {
+                                                "type": 0,
+                                                "strValue": "false",
+                                                "fltValue": 0.0,
+                                                "intValue": 0
+                                            }
+                                        },
+                                        {
+                                            "key": "agnw:GrassHeight",
+                                            "value": {
+                                                "type": 1,
+                                                "strValue": "",
+                                                "fltValue": 40.0,
+                                                "intValue": 0
+                                            }
+                                        },
+                                        {
+                                            "key": "agnw:GrowthStageClover",
+                                            "value": {
+                                                "type": 2,
+                                                "strValue": "",
+                                                "fltValue": 0.0,
+                                                "intValue": 5
+                                            }
+                                        },
+                                        {
+                                            "key": "agnw:GrowthStageGrass",
+                                            "value": {
+                                                "type": 2,
+                                                "strValue": "",
+                                                "fltValue": 0.0,
+                                                "intValue": 2
+                                            }
+                                        },
+                                        {
+                                            "key": "agnw:Harvested",
+                                            "value": {
+                                                "type": 0,
+                                                "strValue": "false",
+                                                "fltValue": 0.0,
+                                                "intValue": 0
+                                            }
+                                        },
+                                        {
+                                            "key": "agnw:MaizeCover",
+                                            "value": {
+                                                "type": 1,
+                                                "strValue": "",
+                                                "fltValue": 45.0,
+                                                "intValue": 0
+                                            }
+                                        },
+                                        {
+                                            "key": "agnw:MoleHillCount",
+                                            "value": {
+                                                "type": 2,
+                                                "strValue": "",
+                                                "fltValue": 0.0,
+                                                "intValue": 0
+                                            }
+                                        },
+                                        {
+                                            "key": "agnw:SnowCovered",
+                                            "value": {
+                                                "type": 0,
+                                                "strValue": "false",
+                                                "fltValue": 0.0,
+                                                "intValue": 0
+                                            }
+                                        },
+                                        {
+                                            "key": "agnw:SoilHumidity",
+                                            "value": {
+                                                "type": 2,
+                                                "strValue": "",
+                                                "fltValue": 0.0,
+                                                "intValue": 10
+                                            }
+                                        },
+                                        {
+                                            "key": "agnw:TempSum",
+                                            "value": {
+                                                "type": 2,
+                                                "strValue": "",
+                                                "fltValue": 0.0,
+                                                "intValue": 315
+                                            }
+                                        },
+                                        {
+                                            "key": "agnw:Usage",
+                                            "value": {
+                                                "type": 3,
+                                                "strValue": "agnw:Silo",
+                                                "fltValue": 0.0,
+                                                "intValue": 0
+                                            }
+                                        },
+                                        {
+                                            "key": "agnw:VegetationStartDate",
+                                            "value": {
+                                                "type": 0,
+                                                "strValue": "2021-03-23 11:00:00",
+                                                "fltValue": 0.0,
+                                                "intValue": 0
+                                            }
+                                        },
+                                        {
+                                            "key": "agnw:VeryDryGround",
+                                            "value": {
+                                                "type": 0,
+                                                "strValue": "false",
+                                                "fltValue": 0.0,
+                                                "intValue": 0
+                                            }
+                                        },
+                                        {
+                                            "key": "agnw:WeedCover",
+                                            "value": {
+                                                "type": 1,
+                                                "strValue": "",
+                                                "fltValue": 20.0,
+                                                "intValue": 0
+                                            }
+                                        },
+                                        {
+                                            "key": "name",
+                                            "value": {
+                                                "type": 0,
+                                                "strValue": "Kiesschacht",
+                                                "fltValue": 0.0,
+                                                "intValue": 0
+                                            }
+                                        },
+                                        {
+                                            "key": "rdf:type",
+                                            "value": {
+                                                "type": 3,
+                                                "strValue": "agnw:ConvField",
+                                                "fltValue": 0.0,
+                                                "intValue": 0
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        "value": ""
+                    },
+                    {
+                        "key": {
+                            "polymorphic_id": 2147483650,
+                            "polymorphic_name": "sempr::GeosGeometry",
+                            "ptr_wrapper": {
+                                "id": 2147483651,
+                                "data": {
+                                    "base": {},
+                                    "wkt": "POLYGON ((8.1551770695965438 52.3246751093340237, 8.1590225794134597 52.3259590018058489, 8.1593134043344548 52.3250920288525236, 8.1604913219566697 52.3238704574893205, 8.1563346557269654 52.3217601743219944, 8.1557000585476658 52.3222430795649771, 8.1555865315625056 52.3223995289699033, 8.1551770695965438 52.3246751093340237))"
+                                }
+                            }
+                        },
+                        "value": "WGS"
+                    }
+                ]
+            }
+        }
+    }
+}

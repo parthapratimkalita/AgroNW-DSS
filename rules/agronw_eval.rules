@@ -1,0 +1,806 @@
+@PREFIX agnw: <agnw:>
+@PREFIX rdf: <rdf:>
+@PREFIX rdfs: <rdfs:>
+
+#Constants
+$TRUE : "true"
+$FALSE : "false"
+
+$UTM : "UTM"
+$WGS : "WGS"
+
+$ZERO : "zero"
+$LOW : "low"
+$MID : "medium"
+$HIGH : "high"
+
+$UsableFieldCapacityThreshold : 85
+
+[subClassTransient:
+    (?a rdfs:subClassOf ?b), (?b rdfs:subClassOf ?c) -> (?a rdfs:subClassOf ?c)]
+[instanceOfSubClass:
+    (?a rdfs:subClassOf ?b), (?x rdf:type ?a) -> (?x rdf:type ?b)]
+
+#General domain rules
+[
+ true()
+ ->
+ (agnw:EcoField rdfs:subClassOf agnw:Field),
+ (agnw:ConvField rdfs:subClassOf agnw:Field),
+ (agnw:SolidManure rdfs:subClassOf agnw:OrganicFertilizer),
+ (agnw:Slurry rdfs:subClassOf agnw:OrganicFertilizer),       #Gülle
+ (agnw:GreenFert rdfs:subClassOf agnw:OrganicFertilizer)
+]
+
+# Global Variable
+[
+    true()
+    ->
+    (agnw:SolidManure agnw:InStock $TRUE), # enough for one field!?
+    (agnw:Slurry agnw:InStock $TRUE),
+    (agnw:ALDG agnw:Machine $FALSE) #Dünger, Arbeitsbreite = Ausbringunsbreite
+]
+
+[ALDG_TRUE:
+    {
+        (agnw:ALDG agnw:Machine $TRUE)
+        /* ALDG machine in use */
+    }
+    ->
+    {
+        (agnw:Global agnw:WaterDistanceProperty agnw:WaterRestrictionDistanceALDG)
+        /* Use ALDG distance */
+    }
+]
+
+[ALDG_False:
+    {
+        (agnw:ALDG agnw:Machine $FALSE)
+        /* Non-ALDG machine in use */
+    }
+    ->
+    {
+        (agnw:Global agnw:WaterDistanceProperty agnw:WaterRestrictionDistance)
+        /* Use standard machine distance */
+    }
+]
+
+#Set nFK from external data
+[setNFK:
+    (?field rdf:type agnw:Field),
+    (?field agnw:Areacode ?areacode),
+    (?soildata rdf:type agnw:SoilData),
+    (?soildata agnw:Areacode ?areacode),
+    (?soildata agnw:nFK ?nFK)
+    ->
+    (?field agnw:UsableFieldCapacity ?nFK)
+]
+
+#Ground properties
+        #{
+        #    (?field agnw:UsableFieldCapacity ?nFK), #nFK
+        #    lt(?nFK $UsableFieldCapacityThreshold)
+        #    /* Usable field capacity {nFK} is below threshold */
+        #}
+
+{   
+    [ReceptiveGround:
+        (?field rdf:type agnw:Field),
+        {
+            (?field agnw:SnowCovered $FALSE)
+            /* Ground is not covered with snow */
+        },
+        {
+            (?field agnw:FrozenGround $FALSE)
+            /* Ground is not frozen */
+        },
+        {
+            (?field agnw:VeryDryGround $FALSE)
+            /* Ground is not very dry */
+        }
+        ->
+        {
+            (?field agnw:ReceptiveGround $TRUE)
+            /* Ground is receptive */
+        }
+    ]
+
+    #How to inform which condition is not met?
+    [ReceptiveGround:
+        {
+            (?field rdf:type agnw:Field),
+            noValue { (?field agnw:ReceptiveGround $TRUE) }
+            /* One or more conditions not met */            
+        }
+        ->
+        {
+            (?field agnw:ReceptiveGround $FALSE)
+            /* Ground is not receptive */
+        }
+    ]
+}
+
+# Process weather information
+# Weather is now a series of WeatherData with dates, temp, rain and sunshine, from n days in the past to m days in the future
+
+# Set current temp dynamically to the WeatherData matching TODAY
+[CurrentTemp:
+    {
+        (?field rdf:type agnw:Field),
+        (?field agnw:Areacode ?fieldcode),
+        (?date rdf:type agnw:Date),
+        (?date agnw:Today ?today),
+        (?weather rdf:type agnw:WeatherData),
+        (?weather agnw:Areacode ?fieldcode),
+        (?weather agnw:WDate ?today),
+        (?weather agnw:Temp ?temp)
+        /* Today's date is {agnw:WDate} */
+    }
+    ->
+    {
+        (?field agnw:CurrentTemp ?temp)
+        /* The current temperature is {temp} deg. C */
+    }
+]
+
+# The next 3 rules use redundant code but since we just need these three basic values, it's not a big deal.
+
+#RainPast2Days
+#print("field" ?field "had average rainfall of" ?avgRain "over" ?days "days"),
+[RainPast2Days:
+    {
+        (?field rdf:type agnw:Field), (?field agnw:Areacode ?areacode),
+        (?date rdf:type agnw:Date), (?date agnw:Today ?today),
+        (?weather rdf:type agnw:WeatherData), (?weather agnw:Areacode ?areacode),    
+        (?weather agnw:WDate ?wdate),
+        date:diff(?diff ?wdate ?today),
+        ge(?diff -2), le(?diff -1), #[-2,-1]
+        (?weather agnw:Rain ?rain), #This is the amount of rain per day in mm.
+        GROUP BY (?field),
+        count(?days ?weather),
+        SumBulk(?sum ?rain),
+        div(?avgRain ?sum ?days) #Avg... or is it just sum?
+        /* Calculate average rainfall from {wdate} to {today} */
+    }
+    ->        
+    {
+        (?field agnw:RainPast2Days ?avgRain)
+        /* Average rainfall in the last 2 days was {avgRain} mm. */
+    }
+]
+
+#Next3Days
+[RainNext3Days:
+    {
+        (?field rdf:type agnw:Field), (?field agnw:Areacode ?areacode),
+        (?date rdf:type agnw:Date), (?date agnw:Today ?today),
+        (?weather rdf:type agnw:WeatherData), (?weather agnw:Areacode ?areacode),    
+        (?weather agnw:WDate ?wdate),
+        date:diff(?diff ?wdate ?today),
+        ge(?diff 1), le(?diff 4), #[1,3]
+        (?weather agnw:Rain ?rain), #This is the amount of rain per day in mm.
+        GROUP BY (?field),
+        count(?days ?weather),
+        SumBulk(?sum ?rain),
+        div(?avgRain ?sum ?days) #Avg... or is it just sum?
+        /* Calculate average rainfall from the day {today} to {wdate} */
+    }
+    ->
+    {
+        (?field agnw:RainNext3Days ?avgRain)
+        /* Average rainfall in the next 3 days is {avgRain} mm. */
+    }
+]
+
+#Next7Days
+[RainNext7Days:
+    {
+        (?field rdf:type agnw:Field), (?field agnw:Areacode ?areacode),
+        (?date rdf:type agnw:Date), (?date agnw:Today ?today),
+        (?weather rdf:type agnw:WeatherData), (?weather agnw:Areacode ?areacode),    
+        (?weather agnw:WDate ?wdate),
+        date:diff(?diff ?wdate ?today),
+        ge(?diff 1), le(?diff 8), #[1,8]
+        (?weather agnw:Rain ?rain), #This is the amount of rain per day in mm.
+        GROUP BY (?field),
+        count(?days ?weather),
+        SumBulk(?sum ?rain),
+        div(?avgRain ?sum ?days) #Avg... or is it just sum?
+        /* Calculate average rainfall from {today} to {wdate} */
+    }
+    ->
+    {
+        (?field agnw:RainNext7Days ?avgRain)
+        /* Average rainfall in the next 7 days is {avgRain} mm. */
+    }
+]
+
+# We can also determine "sunny" using the sunshine value in every weather data.
+# TODO: tagessummetemperatur 
+
+
+# Festmist and Gülle are organic
+
+
+
+#Determine if a field can be fertilized
+[Fertilizable:
+    (?field rdf:type agnw:Field),
+    {
+        (?field agnw:CurrentCrop agnw:Grass)
+        /* Crop is grass */
+    },
+    {
+        (?field agnw:ReceptiveGround $TRUE)
+        /* Ground is receptive */
+    },
+    {
+        (?date agnw:Today ?today),
+        date:month(?month ?today),
+        lt(?month 11),
+        gt(?month 2)
+        /* Month {month} is between February and November */
+    },
+    {
+        noValue { (?field agnw:Harvested $TRUE) }
+        /* Field has not been harvested */
+    }
+    ->
+    {
+        (?field agnw:Fertilizable $TRUE)
+        /* Field can be fertilized */
+    }
+]
+
+#Convert to UTM coords
+[ConvertAlltoUTM:
+    EC<GeosGeomI>(?entity ?geometry "WGS"),
+    geo:UTMFromWGS(?utmGeo ?geometry 32)
+    ->
+    EC(?entity ?utmGeo "UTM")
+]
+
+#Determine appropriate distance from bodies of water
+{
+    [WaterRestrictionDistance5:
+        (?water rdf:type agnw:Water),
+        {
+            (?water agnw:slope ?slope),
+            lt(?slope 5)
+            /* Slope ({slope}) is less than 5 */
+        }
+        ->
+        (?water agnw:WaterRestrictionDistanceALDG 1), #1m wenn Arbeitsbreite = Ausbringunsbreite (AL/DG)
+        (?water agnw:WaterRestrictionDistance 4)
+    ]
+
+    [WaterRestrictionDistance10:
+        (?water rdf:type agnw:Water),
+        {
+            (?water agnw:slope ?slope),
+            ge(?slope 5),
+            lt(?slope 10)
+            /* Slope ({slope}) is between 5 and less than 10 */
+        }
+        ->
+        (?water agnw:WaterRestrictionDistanceALDG 3),
+        (?water agnw:WaterRestrictionDistance 20)
+    ]
+
+    [WaterRestrictionDistance15:
+        (?water rdf:type agnw:Water),
+        {
+            (?water agnw:slope ?slope),
+            ge(?slope 10),
+            lt(?slope 15)
+            /* Slope ({slope}) is between 10 and less than 15 */
+        }
+        ->
+        (?water agnw:WaterRestrictionDistanceALDG 5),
+        (?water agnw:WaterRestrictionDistance 20)
+    ]
+
+    [WaterRestrictionDistance15GE:
+        (?water rdf:type agnw:Water),
+        {
+            (?water agnw:slope ?slope),
+            ge(?slope 15)
+            /* Slope ({slope}) is greater than 15 */
+        }
+        ->
+        (?water agnw:WaterRestrictionDistanceALDG 10),
+        (?water agnw:WaterRestrictionDistance 30)
+    ]
+
+    #Geoms in GUI are in lon/lat
+    #geo:UTMFromWGS(?utmGeo ?wgsGeo ?utmZone) to convert
+    #geo:WGSFromUTM(?wgsGeo ?utmGeo ?utmZone) to convert back to lon/lat
+
+    #EC(?optionEntity ?restricted_field_geom),
+
+    [FertOptionWaterRestriction:
+        (?field rdf:type agnw:Field),
+        {
+            EC<GeosGeomI>(?field ?field_geom "UTM"),
+            (?water rdf:type agnw:Water),
+            (agnw:Global agnw:WaterDistanceProperty ?distanceProp),
+            (?water ?distanceProp ?waterDistance),
+            EC<GeosGeomI>(?water ?water_geom "UTM"),
+            geo:buffer(?waterBuffered ?water_geom ?waterDistance),
+            GROUP BY(?field ?field_geom),
+            geo:unionAll(?buffered_all_water ?waterBuffered),
+            geo:difference(?restricted_field_geom ?field_geom ?buffered_all_water),
+            geo:WGSFromUTM(?wgsRestrictedGeo ?restricted_field_geom 32),
+            (?field agnw:FertOption ?option),
+            createEntity(?optionEntity ?option)
+            /* Use field and water regions to obtain safe area */
+        }
+        ->        
+        {
+            EC(?optionEntity ?wgsRestrictedGeo)
+            /* Field area that respects distance from water */
+        }
+    ]
+}
+
+
+# Mineral N-Fertilization
+# Allowed only in Conventional fields
+{
+    $MineralTempSumThreshold : 200
+    $MineralTempThreshold : 15
+    
+    [MineralNFertOption:
+        {
+            (?field rdf:type agnw:ConvField)
+            /* Conventional (non-organic) field */
+        },
+        {
+            (?date rdf:type agnw:Date),
+            (?date agnw:Today ?today),
+            date:month(?month ?date),
+            lt(?month 11),
+            gt(?month 2)
+            /* Month {month} is between February and November */
+        },
+        {
+            (?field agnw:Fertilizable $TRUE)
+            /* Can be fertilized */
+        },
+        {
+            (?field agnw:TempSum ?ts),
+            ge(?ts $MineralTempSumThreshold)
+            /* Temperature sum ({ts}) is above threshold */
+        },
+        {
+            (?field agnw:CurrentTemp ?currentTemp),
+            le(?currentTemp $MineralTempThreshold)
+            /* Current temperature ({currentTemp}) is below threshold */
+        },
+        {
+            noValue { (?field agnw:IntendedUse agnw:GreenFert) }
+            /* Usage is not organic fertilizer */
+        }
+        makeSkolem(?option ?field agnw:MineralNFert)
+        ->
+        {
+            (?field agnw:FertOption ?option),
+            (?option agnw:FertType agnw:MineralNFert)
+            /* Mineral N fertilization is allowed */
+        }
+    ]
+
+
+
+    #ToDo: Not the whole table currently! Wait for Nils magic update.
+
+    [NFertCloverRate0:  #Reines Gras
+        (?field rdf:type agnw:Field),
+        {
+            (?field agnw:FertOption ?option),
+            (?option agnw:FertType agnw:MineralNFert)
+            /* Mineral N fertilization is allowed */
+        },
+        {
+            (?field agnw:CloverRate ?cr),
+            le(?cr 10)              #ToDO
+            /* Clover rate ({cr}) is 10 or less */
+        }
+        ->
+        {
+            (?option agnw:FertQty 50)   #kg/ha on avg over the seasons
+            /* 50 Kg/ha of N fertilizer is allowed */
+        }
+    ]
+
+    [NFertCloverRate40:  #<40% Clover rate, min 10%
+        (?field rdf:type agnw:Field),
+        {
+            (?field agnw:FertOption ?option),
+            (?option agnw:FertType agnw:MineralNFert)
+            /* Mineral N fertilization is allowed */
+        },
+        {
+            (?field agnw:CloverRate ?cr),
+            gt(?cr 10),
+            le(?cr 40)
+            /* Clover rate ({cr}) is above 10 and 40 or less */
+        }
+        ->
+        {
+            (?option agnw:FertQty 40)   #kg/ha on avg over the seasons
+            /* 40 Kg/ha of N fertilizer is allowed */
+        }
+    ]
+
+    [NFertCloverRate70:  #40-70% Clover rate
+        (?field rdf:type agnw:Field),
+        {
+            (?field agnw:FertOption ?option),
+            (?option agnw:FertType agnw:MineralNFert)
+            /* Mineral N fertilization is allowed */
+        },
+        {
+            (?field agnw:CloverRate ?cr),
+            gt(?cr 40),
+            le(?cr 70)
+            /* Clover rate ({cr}) is above 40 and 70 or less */
+        }
+        ->
+        {
+            (?option agnw:FertQty 30)   #kg/ha on avg over the seasons
+            /* 30 Kg/ha of N fertilizer is allowed */
+        }
+    ]
+
+
+    [NFertCloverRate70: #Over 70% Clover rate
+        (?field rdf:type agnw:Field),
+        {
+            (?field agnw:FertOption ?option),
+            (?option agnw:FertType agnw:MineralNFert)
+            /* Mineral N fertilization is allowed */
+        },
+        {
+            (?field agnw:CloverRate ?cr),
+            gt(?cr 70)
+            /* Clover rate ({cr}) is above 70 */
+        }
+        ->
+        {
+            (?option agnw:FertQty 0)
+            /* Clover rate too high, amount recommended is 0 */
+        }
+    ]
+
+}
+
+#Later on: separate set of rules for field regions e.g. no n ferti if there is a high clover rate!
+
+
+
+
+
+# Use it now? ToDo plan a date for it!?field_geom
+
+
+#ToDo: Skip water reservation areas for now.
+#
+
+
+#when? where? how much?
+
+#no weather cond.?
+
+#Tagessummentemperatur
+
+
+
+
+#Organic
+{
+$OrganicTempThreshold : 20
+$OrganicTempSumThreshold : 200
+
+[OrganicFert:
+    (?field rdf:type agnw:Field),
+    {
+        (?field agnw:CurrentCrop agnw:Grass)
+        /* Crop is grass */
+    },
+    {
+        (?field agnw:TempSum ?ts),
+        ge(?ts $OrganicTempSumThreshold)
+        /* Temperature sum ({ts}) is above threshold */
+    },
+    {
+        (?field agnw:CurrentTemp ?currentTemp),
+        le(?currentTemp $OrganicTempThreshold)
+        /* Current temperature ({currentTemp}) is below threshold */
+    },
+    {
+        noValue { (?field agnw:WeatherCondition agnw:Sunny ) }
+        /* Weather is not sunny */
+    },
+    {
+        (?field agnw:ReceptiveGround $TRUE)
+        /* Ground is receptive */
+    },
+    {
+        (?date rdf:type agnw:Date),
+        (?date agnw:Today ?today),
+        date:month(?month ?date),
+        lt(?month 11),
+        gt(?month 2)
+        /* Month {month} is between February and November */
+    },
+    {
+        noValue { (?field agnw:IntendedUse agnw:GreenFert) }
+        /* Usage is not green fertilizer */
+    }
+    makeSkolem(?option ?field agnw:OrganicFert)
+    ->
+    {
+        (?field agnw:FertOption ?option),
+        (?option agnw:FertType agnw:OrganicFert)
+        /* Organic fertilizer is allowed */
+    }
+]
+}
+#[OrganicFertOptLimit:
+#    (?field agnw:FertOption ?option),
+#    (?option agnw:FertType agnw:OrganicFert),
+#    (?field )#
+#                       #check restriction area!
+#    ->
+#    EC(?optionEntity ?restricted_field_geom)
+#]
+
+
+# Harvesting rules
+{
+$RainThreshold : 2 #mm rain per day
+$crudeFiberThreshold : 22
+$crudeFiberPerDay : 0.3
+
+[SetCloverRateHigh:
+    (?field agnw:CloverRate ?cr),
+    gt(?cr 70)
+    ->
+    {
+    (?field agnw:CloverRateRank $HIGH)
+    /* Clover rate is high */
+    }
+]
+
+[SetCloverRateMedium:
+    (?field agnw:CloverRate ?cr),
+    le(?cr 70),
+    ge(?cr 40)
+    ->
+    {
+    (?field agnw:CloverRateRank $MID)
+    /* Clover rate is medium */
+    }
+]
+
+[SetCloverRateLow:
+    (?field agnw:CloverRate ?cr),
+    lt(?cr 40)
+    ->
+    {
+    (?field agnw:CloverRateRank $LOW)
+    /* Clover rate is low */
+    }
+]
+
+[HarvestingOptionHay:
+    (?field rdf:type agnw:Field),
+    (?field agnw:CurrentCrop agnw:Grass),
+    #(?field agnw:UsableFieldCapacity ?nFK), #nFK
+    #lt(?nFK $UsableFieldCapacityThreshold), 
+    (?field agnw:RainPast2Days ?rainPast), #get mean
+    le(?rainPast $RainThreshold),
+    (?field agnw:RainNext7Days ?rainFuture), #get mean
+    le(?rainFuture $RainThreshold)
+    ->
+    {
+    (?field agnw:Harvestable agnw:Hay)
+    /* Harvesting option is hay */
+    }
+]
+
+[HarvestingOptionSilo:
+    (?field rdf:type agnw:Field),
+    (?field agnw:CurrentCrop agnw:Grass),
+    #(?field agnw:UsableFieldCapacity ?nFK), #nFK
+    #lt(?nFK $UsableFieldCapacityThreshold), 
+    (?field agnw:RainPast2Days ?rainPast),
+    le(?rainPast $RainThreshold),
+    (?field agnw:RainNext3Days ?rainFuture),
+    le(?rainFuture $RainThreshold)
+    ->
+    {
+    (?field agnw:Harvestable agnw:Silo)
+    /* Harvesting option is silo */
+    }
+]
+
+[HarvestingGrassHeight:
+    (?field rdf:type agnw:Field),
+    (?field agnw:CurrentCrop agnw:Grass),
+    (?field agnw:Harvestable ?harvestable),
+    (?field agnw:GrassHeight ?grassHeight),
+    ge(?grassHeight 25)
+    ->
+    {
+    (?field agnw:RecomHarvesting $TRUE),
+    (?field agnw:HarvestReason "Grass height")
+    /* Harvest reason grass height */
+    }
+]
+
+[HighCloverRateHarvesting:
+    (?field rdf:type agnw:Field),
+    (?field agnw:CurrentCrop agnw:Grass),
+    (?field agnw:Harvestable ?harvestable), #Any option, Silo or Hay
+    (?field agnw:CloverRateRank $HIGH),
+    (?field agnw:GrowthStageClover ?stage),
+    ge(?stage 4)
+    ->
+    {
+    (?field agnw:RecomHarvesting $TRUE),
+    (?field agnw:HarvestReason "Clover growth rate 4")
+    /* Harvest reason is clover growth rate 4 */
+    }
+]
+
+[MainlyGrassHarvesting:
+    (?field rdf:type agnw:Field),
+    (?field agnw:CurrentCrop agnw:Grass),
+    (?field agnw:Harvestable ?harvestable),
+    (?field agnw:CloverRateRank $LOW),
+    (?field agnw:GrowthStageGrass ?stage),
+    ge(?stage 2)
+    ->
+    {
+    (?field agnw:RecomHarvesting $TRUE),
+    (?field agnw:HarvestReason "Growth stage grass 2")
+    /* Harvest reason is growth stage grass 2 */
+    }
+]
+
+[HayHarvesting:
+    (?field rdf:type agnw:Field),
+    (?field agnw:CurrentCrop agnw:Grass),
+    (?field agnw:Harvestable agnw:Hay),
+    (?field agnw:GrowthStageGrass ?stage),
+    ge(?stage 4)
+    ->
+    {
+    (?field agnw:RecomHarvesting $TRUE),
+    (?field agnw:HarvestReason "Growth stage grass 4")
+    /* Harvest reason is growth stage grass 4 */
+    }
+]
+
+[SiloHarvesting:
+    (?field rdf:type agnw:Field),
+    (?field agnw:CurrentCrop agnw:Grass),
+    (?field agnw:Harvestable agnw:Silo),
+    (?field agnw:GrowthStageGrass ?stage),
+    ge(?stage 2)
+    ->
+    {
+    (?field agnw:RecomHarvesting $TRUE),
+    (?field agnw:HarvestReason "Growth stage grass 2")
+    /* Harvest reason is growth stage grass 2 */
+    }
+]
+
+#Does not work in every case, only before first cut
+[CrudeFiberContent:
+    (?field rdf:type agnw:Field),
+    (?field agnw:CurrentCrop agnw:Grass),
+    (?field agnw:Harvestable agnw:Silo),
+    (?field agnw:VegetationStartDate ?vegStartDate),  #Tagessummentemp 200
+    (?date agnw:Today ?today),    
+    date:diff(?diff ?today ?vegStartDate),
+    mul(?result ?diff $crudeFiberPerDay),
+    gt(?result $crudeFiberThreshold), 
+    noValue { (?field agnw:Harvested $TRUE) }
+    ->
+    {
+    (?field agnw:RecomHarvesting $TRUE),
+    (?field agnw:HarvestReason "Crude fiber")
+    /* Harvest reason is crude fiber */
+    }
+]
+
+}
+
+
+#tine weeding (Striegeln)
+{
+#ToDo: no rain! Check amount of rain in weather data
+$SoilHumidityThreshold : 20
+
+    [TineWeeding:
+        (?field rdf:type agnw:Field),
+        {
+            (?field agnw:CurrentCrop agnw:Grass)
+            /* Current crop is grass */
+        },
+        {
+            (?field agnw:SoilHumidity ?soilHumidity),
+            lt(?soilHumidity $SoilHumidityThreshold)
+            /* Soil moisture ({soilHumidity}) is below threshold */
+        }
+        ->
+        {
+            (?field agnw:ManagementOption agnw:TineWeeding)
+            /* Tine Weeding is a management option */
+        }
+    ]
+}
+
+{
+
+#todo: geo:area
+
+$MoleHillHAThreshold : 40
+
+[TineWeedingMoleHill:
+(?field agnw:ManagementOption agnw:TineWeeding),
+(?field agnw:MoleHillCount ?moleHillCount),
+EC<GeosGeomI>(?field ?field_geom),
+#geo:area(?field_area ?field_geom),
+#div(?field_area_ha ?field_area 10000),
+#div(?mole_count_ha ?moleHillCount ?field_area_ha),
+#ge(?mole_count_ha $MoleHillHAThreshold)
+ge(?moleHillCount $MoleHillHAThreshold)
+->
+(?field agnw:RecomMeasure agnw:TineWeeding)
+]
+
+}
+
+{
+$DistelM2Threshold : 40
+
+[TineWeedingDistel:
+(?field agnw:ManagementOption agnw:TineWeeding),
+(?field agnw:DistelM2Rate ?DistelM2Rate),
+ge(?DistelM2Rate $DistelM2Threshold)
+->
+(?field agnw:RecomMeasure agnw:TineWeeding)
+]
+}
+
+{
+$AmpferM2Threshold : 40
+
+[TineWeedingAmpfer:
+(?field agnw:ManagementOption agnw:TineWeeding),
+(?field agnw:AmpferM2Rate ?AmpferM2Rate),
+ge(?AmpferM2Rate $AmpferM2Threshold)
+->
+(?field agnw:RecomMeasure agnw:TineWeeding)
+]
+}
+
+{
+$RagwortM2Threshold : 40 # or stinking Wille
+
+[TineWeedingRagwort: #Jackobskreuzkraut
+(?field agnw:ManagementOption agnw:TineWeeding),
+(?field agnw:RagwortM2Rate ?RagwortM2Rate),
+ge(?RagwortM2Rate $RagwortM2Threshold)
+->
+(?field agnw:RecomMeasure agnw:TineWeeding)
+]
+
+#ToDo e.g. Sum of the Weeds need to be checked!
+
+
+}

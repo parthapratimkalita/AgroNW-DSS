@@ -1,0 +1,61 @@
+{
+    "value0": {
+        "polymorphic_id": 1073741824,
+        "ptr_wrapper": {
+            "id": 2147483649,
+            "data": {
+                "id": "<agnw:Water_1>",
+                "idIsURI": true,
+                "components": [
+                    {
+                        "key": {
+                            "polymorphic_id": 2147483649,
+                            "polymorphic_name": "sempr::GeosGeometry",
+                            "ptr_wrapper": {
+                                "id": 2147483650,
+                                "data": {
+                                    "base": {},
+                                    "wkt": "POLYGON ((8.1563189999999999 52.3217929999999996, 8.1569739999999999 52.3221459999999965, 8.1573650000000004 52.3222880000000004, 8.1563890000000008 52.3217449999999999, 8.1563189999999999 52.3217929999999996))"
+                                }
+                            }
+                        },
+                        "value": "WGS"
+                    },
+                    {
+                        "key": {
+                            "polymorphic_id": 2147483650,
+                            "polymorphic_name": "sempr::TriplePropertyMap",
+                            "ptr_wrapper": {
+                                "id": 2147483651,
+                                "data": {
+                                    "base": {},
+                                    "map": [
+                                        {
+                                            "key": "agnw:slope",
+                                            "value": {
+                                                "type": 2,
+                                                "strValue": "",
+                                                "fltValue": 0.0,
+                                                "intValue": 8
+                                            }
+                                        },
+                                        {
+                                            "key": "rdf:type",
+                                            "value": {
+                                                "type": 3,
+                                                "strValue": "agnw:Water",
+                                                "fltValue": 0.0,
+                                                "intValue": 0
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        "value": ""
+                    }
+                ]
+            }
+        }
+    }
+}

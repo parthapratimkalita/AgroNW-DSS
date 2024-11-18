@@ -1,0 +1,10 @@
+0,1,2,3
+agnw:Areacode,agnw:GrassHeight,agnw:CloverRate,agnw:CurrentCrop
+agnw:EarVisible,agnw:MaizeCover,agnw:GrowthStageClover,agnw:Usage
+agnw:FrozenGround,agnw:UsableFieldCapacity,agnw:GrowthStageGrass,rdf:type
+agnw:GrassFlowering,agnw:WeedCover,agnw:MoleHillCount,
+agnw:Harvested,,agnw:SoilHumidity,
+agnw:SnowCovered,,agnw:TempSum,
+agnw:VegetationStartDate,,,
+agnw:VeryDryGround,,,
+name,,,

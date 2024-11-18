@@ -1,0 +1,10 @@
+pandas
+matplotlib
+numpy
+requests
+folium
+regex
+PyQt5
+plotly
+Flask
+
