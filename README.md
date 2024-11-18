@@ -22,8 +22,8 @@ Given the nature of this prototype, some knowlege of the Linux terminal and pack
 
 ## How to run
 - Obtain and install "Rete", "Pegmatite" and "SEMPR" (most should be available within the [SEMPR Toolkit](https://github.com/sempr-tk))
-- Obtain and set up (compile, install) the Python bindings for SEMPR
-- Install python and core, related libraries (e.g., pip)
+- Install Python and core, related libraries (e.g., pip)
+- Obtain and set up (compile, install) the Python bindings for SEMPR (also in the [SEMPR Toolkit](https://github.com/sempr-tk))
 - Install all the depedencies listed in the file "requirements.txt".
     - e.g., `pip install -r requirements.txt`
 - To run the server: `python3 server.py`
