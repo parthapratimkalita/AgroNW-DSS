@@ -21,7 +21,7 @@ The AgroNW DSS is built on the SEMPR inference engine, which depends on a number
 Given the nature of this prototype, some knowlege of the Linux terminal and package management is expected.
 
 ## How to run
-- Obtain and install "Rete", "Pegmatite" and "SEMPR" (most should also be on GitHub)
+- Obtain and install "Rete", "Pegmatite" and "SEMPR" (most should be available within the [SEMPR Toolkit] (https://github.com/sempr-tk))
 - Obtain and set up (compile, install) the Python bindings for SEMPR
 - Install python and core, related libraries (e.g., pip)
 - Install all the depedencies listed in the file "requirements.txt".
