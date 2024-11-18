@@ -25,6 +25,6 @@ Given the nature of this prototype, some knowlege of the Linux terminal and pack
 - Obtain and set up (compile, install) the Python bindings for SEMPR
 - Install python and core, related libraries (e.g., pip)
 - Install all the depedencies listed in the file "requirements.txt".
-    - e.g., "pip install -r requirements.txt"
-- To run the server: "python3 server.py"
-- To run the client: "python3 client.py"
+    - e.g., `pip install -r requirements.txt`
+- To run the server: `python3 server.py`
+- To run the client: `python3 client.py`
