@@ -25,11 +25,10 @@ def get_wmes():
     core = sempr.Core("db")
     core.loadPlugins()
 
-
-
     def verbose(msg):
         return msg
     
+    #Read rules file
     file = open("rules/agronw_eval.rules", "r")
     content = file.read()
     core.addRules(verbose(content))
@@ -66,8 +65,8 @@ def get_wmes():
     given_date = date.today()
     given_date_str = given_date.strftime('%d.%m.%Y')
 
+    #Get weather information for each location
     for i in area_codes:
-
         weather.station_example(str(i), str(given_date_str))
         weat1.station_example(str(i))
         read.read_weather()
@@ -96,7 +95,7 @@ def get_wmes():
         filtered_df = filtered_df.reset_index()
         filtered_df = filtered_df.drop(columns=['index'])
         
-
+        #Weather Data contains average air temperature, rain and sunshine for each YYYY-MM-DD
         WeatherData_entity = {}
         for j in range(len(filtered_df)):
 
@@ -139,8 +138,7 @@ def get_wmes():
     for file in files:
         os.remove(file)
 
-    
-
+    #Initialize SEMPR core
     state = core.reasoner.inferenceState
     wmes = state.getWMEs()
     wmes_global = wmes

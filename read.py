@@ -26,22 +26,14 @@ def read_weather():
     df1['parameter'] = df1['parameter'].apply(lambda x: 'precipitation_height' if x == 'precipitation_height_significant_weather_last_1h' else x)
 
     mean_df1 = df1.groupby([ 'date_only', 'parameter'])['value'].mean().reset_index()
-    #print(mean_df.head(10))
 
     pivot_df1 = mean_df1.pivot(index=['date_only'], columns='parameter', values='value').reset_index()
     pivot_df1["temperature_air_mean_200"] = pivot_df1["temperature_air_mean_200"] - 273.15
 
-
-
-    #print(df.columns)
     mean_df = df.groupby([ 'date_only', 'parameter'])['value'].mean().reset_index()
-    #print(mean_df.head(10))
 
     pivot_df = mean_df.pivot(index=['date_only'], columns='parameter', values='value').reset_index()
-    pivot_df["temperature_air_mean_200"] = pivot_df["temperature_air_mean_200"] - 273.15
-    
-    #print(mean_df.tail(50))
-    
+    pivot_df["temperature_air_mean_200"] = pivot_df["temperature_air_mean_200"] - 273.15   
 
     combined_df = pd.concat([pivot_df, pivot_df1])
     combined_df.to_csv('input_weather_tm.csv')

@@ -90,44 +90,6 @@ class MainWindow(QMainWindow):
         self.fWmes.clicked.connect(self.go_to_fwmes)
         self.buttons = []
 
-        # ...
-
-        # Assume that self.container is your container widget
-        # Fetch the latest news related to agriculture
-        # response = requests.get('https://newsapi.org/v2/everything?q=agriculture&apiKey=6c44615aab8f48b39dd71f5e3588f663')
-
-        # Parse the response
-        # news = response.json()
-        # with open('news_result.json', 'w+') as f:
-        #        json.dump(news, f, indent=4)
-
-        # Create a QTextBrowser and add it to the UI
-        # self.newsBrowser = QTextBrowser(self.rightPage)
-        # layout = QVBoxLayout()
-
-        # Display the news in the QTextBrowser
-        # i = 0
-        # for article in news['articles']:
-        #    if i == 10:
-        #        break
-        #    formatted_article = f"<h2><a href='{article['url']}'>{article['title']}</a></h2><p>{article['description']}</p>"
-        #    self.newsBrowser.append(formatted_article)
-        #    i += 1
-
-        #layout.addWidget(self.newsBrowser)
-        #self.rightPage.setLayout(layout)
-        #self.newsBrowser.setOpenExternalLinks(True)
-        #self.newsBrowser.moveCursor(QTextCursor.Start)
-
-        # self.infraBtn.setStyleSheet("""
-        #    background-color: green; 
-        #    border-radius: 10px; 
-        #    text-align: center;
-        #""")
-        # ...
-
-       # ...
-
         self.explainBtn = QPushButton("Explain", self)
         self.explainBtn.setStyleSheet("""
             background-color: green; 
@@ -140,7 +102,6 @@ class MainWindow(QMainWindow):
         # Add a QLabel to display the image
         self.imageLabel = QLabel(self)
         self.imageLabel.hide()  # Hide the label initially
-
 
     # ...
     
