@@ -6,7 +6,7 @@ The DSS was designed and developed by members of the Plan-Based Robot Control Gr
 
 The Agro-Nordwest project was funded by the Federal Ministry of Food and Agriculture (BMEL) Agriculture (BMEL) on the basis of a resolution of the German Bundestag via the Federal Agency for Agriculture and Food (BLE) within the framework of the innovation support program.
 
-Many thanks to our colleagues from the UOS and the HSOS for their contribution.
+Many thanks to our colleagues from the University of Osnabrück, the Hochschule Osnabrück and the Agrotech Valley Forum for their contribution.
 
 ## Related publications:
 - Reuter, T., Saborío Morales, J. C., Tieben, C., Nahrstedt, K., Kraatz, F., Meemken, H., et al. (2023). Evaluation of a decision support system for the recommendation of pasture harvest date and form. In Hoffmann, C., Stein, A., et al. 43. GIL-Jahrestagung (GIL-2023), Resiliente Agri-Food-Systeme. Pp. 489-494, ISBN 978-3-88579-724-1, Gesellschaft für Informatik e.V. Bonn, 2/2023.
